@@ -60,7 +60,7 @@ function select_db()
 	while($result=mysqli_fetch_array($results))
 	{
 		echo "
-		<title>Simple Blog | ".$result['judul']."</title>
+		<title>Simple Blog | ".htmlspecialchars($result['judul'])."</title>
 		";
 	}
 ?>
@@ -87,8 +87,8 @@ function select_db()
 			{
 				echo"
 				<div class='art-header-inner' style='margin-top: 500px; opacity: 1;'>
-					<time class='art-time'>".$result['tanggal']."</time>
-					<h2 class='art-title'>".$result['judul']."</h2>
+					<time class='art-time'>".htmlspecialchars($result['tanggal'])."</time>
+					<h2 class='art-title'>".htmlspecialchars($result['judul'])."</h2>
 					<p class='art-subtitle'></p>
 				</div>
 				";
@@ -104,7 +104,7 @@ function select_db()
 				while($result=mysqli_fetch_array($results))
 				{
 					echo "
-					<p>".$result['konten']."</p>
+					<p>".htmlspecialchars($result['konten'])."</p>
 					";
 				}
 			?>
@@ -133,25 +133,6 @@ function select_db()
     </div>
 
 </article>
-
-<footer class="footer">
-    <div class="back-to-top"><a href="">Back to top</a></div>
-    <!-- <div class="footer-nav"><p></p></div> -->
-    <div class="psi">&Psi;</div>
-    <aside class="offsite-links">
-        Asisten IF3110 /
-        <a class="rss-link" href="#rss">RSS</a> /
-        <br>
-        <a class="twitter-link" href="http://twitter.com/YoGiiSinaga">Yogi</a> /
-        <a class="twitter-link" href="http://twitter.com/sonnylazuardi">Sonny</a> /
-        <a class="twitter-link" href="http://twitter.com/fathanpranaya">Fathan</a> /
-        <br>
-        <a class="twitter-link" href="#">Renusa</a> /
-        <a class="twitter-link" href="#">Kelvin</a> /
-        <a class="twitter-link" href="#">Yanuar</a> /
-        
-    </aside>
-</footer>
 
 </div>
 

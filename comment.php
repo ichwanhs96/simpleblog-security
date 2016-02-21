@@ -46,10 +46,10 @@
 		echo "
 		<li class='art-list-item'>
 			<div class='art-list-item-title-and-time'>
-				<h2 class='art-list-title'><a href='#'>".$result['nama']."</a></h2>
+				<h2 class='art-list-title'><a href='#'>".htmlspecialchars($result['nama'])."</a></h2>
 				<div class='art-list-time'>2 menit yang lalu</div>
 			</div>
-			<p>".$result['komentar']."&hellip;</p>
+			<p>".htmlspecialchars($result['komentar'])."</p>
 		</li>
 		";
 	}

@@ -93,10 +93,10 @@ function select_db()
 					<li class='art-list-item'>
 						<div class='art-list-item-title-and-time'>
 							<h2 class='art-list-title'><a href='#' onclick='formSubmitPost(".$result['ID'].")'>".$result['judul']."</a></h2>
-							<div class='art-list-time'>".$result['tanggal']."</div>
+							<div class='art-list-time'>".htmlspecialchars($result['tanggal'])."</div>
 							<div class='art-list-time'><span style='color:#F40034;'>&#10029;</span> Featured</div>
 						</div>
-						<p>".$result['konten']."&hellip;</p>
+						<p>".htmlspecialchars($result['konten'])."</p>
 						<p>
 						  <a href='#' onclick='formSubmitEdit(".$result['ID'].")'>Edit</a> | <a href='#' onclick='ConfirmDelete(".$result['ID'].")'>Hapus</a>
 						</p>
@@ -108,25 +108,6 @@ function select_db()
         </nav>
     </div>
 </div>
-
-<footer class="footer">
-    <div class="back-to-top"><a href="#">Back to top</a></div>
-    <!-- <div class="footer-nav"><p></p></div> -->
-    <div class="psi">&Psi;</div>
-    <aside class="offsite-links">
-        Asisten IF3110 /
-        <a class="rss-link" href="#rss">RSS</a> /
-        <br>
-        <a class="twitter-link" href="http://twitter.com/YoGiiSinaga">Yogi</a> /
-        <a class="twitter-link" href="http://twitter.com/sonnylazuardi">Sonny</a> /
-        <a class="twitter-link" href="http://twitter.com/fathanpranaya">Fathan</a> /
-        <br>
-        <a class="twitter-link" href="#">Renusa</a> /
-        <a class="twitter-link" href="#">Kelvin</a> /
-        <a class="twitter-link" href="#">Yanuar</a> /
-        
-    </aside>
-</footer>
 
 </div>
 
