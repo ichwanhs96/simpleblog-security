@@ -67,6 +67,15 @@ function validate(nama, email, komentar)
 	return true;
 }
 
+function validateRegistration(){
+	var email = document.getElementById('Username').value;
+	if (!validateEmail(email))
+	{
+		alert('Email tidak valid');
+		return false;
+	}
+}
+
 function validateEmail(email) { 
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);

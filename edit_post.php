@@ -11,6 +11,50 @@ function connect_db()
 	
 	return $con;
 }
+
+?>
+<?php  //Start the Session
+session_start();
+if (isset($_POST['Username']) and isset($_POST['Password'])){
+	$username = $_POST['Username'];
+	$password = $_POST['Password'];
+	$isUserFound = false;
+	$con = connect_db();
+	$sql_statement = "SELECT * FROM user WHERE username='$username' AND password='$password'";
+	 
+	$results = mysqli_query($con, $sql_statement);
+	while($result=mysqli_fetch_array($results)){
+		$isUserFound = true;
+	}
+	//3.1.2 If the posted values are equal to the database values, then session will be created for the user.
+	if ($isUserFound){
+		$_SESSION['Username'] = $username;
+	}else{
+		//3.1.3 If the login credentials doesn't match, he will be shown with an error message.
+		$_SESSION['Status'] = "Invalid Login Credentials";
+		//3.2 When the user visits the page first time, simple login form will be displayed.
+		$url = "login.php";
+		
+		function redirect($url, $statusCode = 303)
+		{
+		   header('Location: ' . $url, true, $statusCode);
+		   die();
+		}
+		
+		redirect($url);
+		}
+}else{
+	//3.2 When the user visits the page first time, simple login form will be displayed.
+	$url = "login.php";
+	
+	function redirect($url, $statusCode = 303)
+	{
+	   header('Location: ' . $url, true, $statusCode);
+	   die();
+	}
+	
+	redirect($url);
+}
 ?>
 
 <!DOCTYPE html>
