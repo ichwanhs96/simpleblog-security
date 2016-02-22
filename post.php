@@ -26,24 +26,19 @@ function select_db()
 
 <?php  //Start the Session
 session_start();
-if (isset($_POST['Username']) and isset($_POST['Password'])){
-	$username = $_POST['Username'];
-	$password = $_POST['Password'];
-	$isUserFound = false;
+if(isset($_SESSION['Fingerprint']) && isset($_SESSION['Username'])){
+	$isFingerprintValid = false;
 	$con = connect_db();
-	$sql_statement = "SELECT * FROM user WHERE username='$username' AND password='$password'";
-	 
+	$fingerprint = $_SESSION['Fingerprint'];
+	$username = $_SESSION['Username'];
+	$sql_statement = "SELECT * FROM user WHERE username='$username' and fingerprint='$fingerprint'";
 	$results = mysqli_query($con, $sql_statement);
 	while($result=mysqli_fetch_array($results)){
-		$isUserFound = true;
+		$isFingerprintValid = true;
 	}
-	//3.1.2 If the posted values are equal to the database values, then session will be created for the user.
-	if ($isUserFound){
-		$_SESSION['Username'] = $username;
-	}else{
-		//3.1.3 If the login credentials doesn't match, he will be shown with an error message.
+
+	if(!$isFingerprintValid){
 		$_SESSION['Status'] = "Invalid Login Credentials";
-		//3.2 When the user visits the page first time, simple login form will be displayed.
 		$url = "login.php";
 		
 		function redirect($url, $statusCode = 303)
@@ -53,8 +48,77 @@ if (isset($_POST['Username']) and isset($_POST['Password'])){
 		}
 		
 		redirect($url);
+	}
+
+	$length = 50;
+	$fingerprint = bin2hex(openssl_random_pseudo_bytes(16));
+	$username = $_SESSION['Username'];
+	$sql = "UPDATE user SET fingerprint='$fingerprint' WHERE username='$username'";
+	
+	if (!mysqli_query($con,$sql)) 
+	{
+		die('Error: ' . mysqli_error($con));
+	}
+
+	$_SESSION['Fingerprint'] = $fingerprint;
+
+	mysqli_close($con);
+}
+else if(isset($_COOKIE['simpleblog-token'])){
+	$isTokenValid = false;
+	$token = $_COOKIE['simpleblog-token'];
+	$con = connect_db();
+	$sql_statement = "SELECT * FROM user WHERE token='$token'";
+	$results = mysqli_query($con, $sql_statement);
+	while($result=mysqli_fetch_array($results)){
+		$isTokenValid = true;
+		$_SESSION['Fingerprint'] = $result['fingerprint'];
+		$_SESSION['Username'] = $result['username'];
+	}
+
+	$username = $_SESSION['Username'];
+
+	if($isTokenValid){
+		$length = 50;
+		$token = bin2hex(openssl_random_pseudo_bytes(16));
+
+		$sql = "UPDATE user SET token='$token' WHERE username='$username'";
+		
+		if (!mysqli_query($con,$sql)) 
+		{
+			die('Error: ' . mysqli_error($con));
+		}		
+		mysqli_close($con);
+		
+		$cookie_name="simpleblog-token";
+		$cookie_value=$token;
+		setcookie($cookie_name, $cookie_value, time() + (10 * 365 * 24 * 60 * 60)); //20 years;
+
+		$url = "index.php";
+		
+		function redirect($url, $statusCode = 303)
+		{
+		   header('Location: ' . $url, true, $statusCode);
+		   die();
 		}
-}else{
+		
+		redirect($url);
+	}
+	else {
+		mysqli_close($con);
+		$_SESSION['Status'] = "Invalid Login Credentials";
+		$url = "login.php";
+		
+		function redirect($url, $statusCode = 303)
+		{
+		   header('Location: ' . $url, true, $statusCode);
+		   die();
+		}
+		
+		redirect($url);
+	}
+}
+else{
 	//3.2 When the user visits the page first time, simple login form will be displayed.
 	$url = "login.php";
 	
@@ -119,6 +183,8 @@ if (isset($_POST['Username']) and isset($_POST['Password'])){
     <a style="border:none;" id="logo" href="index.php"><h1>Simple<span>-</span>Blog</h1></a>
     <ul class="nav-primary">
         <li><a href="new_post.php">+ Tambah Post</a></li>
+        <li><?php echo $_SESSION['Username']; ?></a></li>
+        <li><a href="logout.php"> logout</a></li>
     </ul>
 </nav>
 

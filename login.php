@@ -1,5 +1,60 @@
+<?php
+function connect_db()
+{
+  // Create connection
+  $con=mysqli_connect("localhost","root","","simple_post");
+
+  // Check connection
+  if (mysqli_connect_errno()) {
+    echo "Failed to connect to MySQL: " . mysqli_connect_error();
+  }
+  
+  return $con;
+}
+?>
 <?php  //Start the Session
 session_start();
+if(isset($_COOKIE['simpleblog-token'])){
+  $isTokenValid = false;
+  $token = $_COOKIE['simpleblog-token'];
+  $con = connect_db();
+  $sql_statement = "SELECT * FROM user WHERE token='$token'";
+  $results = mysqli_query($con, $sql_statement);
+  while($result=mysqli_fetch_array($results)){
+    $isTokenValid = true;
+    $_SESSION['Fingerprint'] = $result['fingerprint'];
+    $_SESSION['Username'] = $result['username'];
+  }
+
+  $username = $_SESSION['Username'];
+
+  if($isTokenValid){
+    $length = 50;
+    $token = bin2hex(openssl_random_pseudo_bytes(16));
+
+    $sql = "UPDATE user SET token='$token' WHERE username='$username'";
+    
+    if (!mysqli_query($con,$sql)) 
+    {
+      die('Error: ' . mysqli_error($con));
+    }   
+
+    $cookie_name="simpleblog-token";
+    $cookie_value=$token;
+    setcookie($cookie_name, $cookie_value, time() + (10 * 365 * 24 * 60 * 60)); //20 years;
+    mysqli_close($con);
+
+    $url = "index.php";
+    
+    function redirect($url, $statusCode = 303)
+    {
+       header('Location: ' . $url, true, $statusCode);
+       die();
+    }
+    
+    redirect($url);
+  }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -37,6 +92,9 @@ session_start();
             </div>
             <div class="form-group">
               <input type="password" class="form-control input-lg" placeholder="Password" id="Password" name="Password">
+            </div>
+            <div class="form-group">
+              <input type="checkbox" id="RememberMe" name="RememberMe"> Remember Me
             </div>
             <div class="form-group">
               <button class="btn btn-primary btn-lg btn-block">Sign In</button>

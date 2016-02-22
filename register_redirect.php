@@ -9,10 +9,16 @@
 	
 	$username = mysqli_real_escape_string($con, $_POST['Username']);
 	$password = mysqli_real_escape_string($con, $_POST['Password']);
-	
+
+	$options = [
+    'cost' => 11,
+	];
+
+	$hashedPassword = password_hash($password, PASSWORD_BCRYPT, $options);
+		
 	//insert new data
 	$sql = "INSERT INTO user (username, password)
-			VALUES ('$username', '$password')";
+			VALUES ('$username', '$hashedPassword')";
 	
 	if (!mysqli_query($con,$sql)) 
 	{
