@@ -1,31 +1,34 @@
 <?php
-	// Create connection
-	$con=mysqli_connect("localhost","root","","simple_post");
+	require_once('class/db.php');
+	require_once('class/utils.php');
+	require_once('class/tokenHandler.php');
+	require_once('class/userManagement.php');
 
-	// Check connection
-	if (mysqli_connect_errno()) {
-	echo "Failed to connect to MySQL: " . mysqli_connect_error();
+	include('auth.php');
+	$token = $_GET['token'];
+	$sessionToken = $_SESSION['token'];
+	$tokenHandler = new tokenHandler();
+	$utils = new utils();
+	//check is token valid or not
+	if($token!= $sessionToken){
+		$utils()->redirect("login.php");
 	}
+	//if token valid generate new random unguessable token for user
+	$_SESSION['token'] = $tokenHandler->regenerateToken(session_id(),"delete_post");
+
+	//get user id
+	$userId = $_SESSION['userId'];
+	//connect db
+	$db = new Db();
 	
 	$ID = $_GET['ID'];
-	
-	//insert new data
-	$sql = "DELETE FROM info_post WHERE ID=$ID";
-	
-	if (!mysqli_query($con,$sql)) 
-	{
-		die('Error: ' . mysqli_error($con));
+	$ID = $db -> quote($ID);
+
+	$query = "DELETE FROM info_post WHERE ID=".$ID." AND user_id = ".$userId."";
+	$result = $db -> query($query);
+	if($result){
+		echo "success";
+	} else {
+		echo "user not valid";
 	}
-	
-	mysqli_close($con);
-	
-	$url = "index.php";
-	
-	function redirect($url, $statusCode = 303)
-	{
-	   header('Location: ' . $url, true, $statusCode);
-	   die();
-	}
-	
-	redirect($url);
 ?>

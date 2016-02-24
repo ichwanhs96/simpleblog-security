@@ -1,135 +1,9 @@
 <?php
-function connect_db()
-{
-	// Create connection
-	$con=mysqli_connect("localhost","root","","simple_post");
-
-	// Check connection
-	if (mysqli_connect_errno()) {
-	echo "Failed to connect to MySQL: " . mysqli_connect_error();
-	}
-	
-	return $con;
-}
-
-function select_db()
-{
-	$id = $_POST['postIdPost'];
-	$con = connect_db();
-	$sql_statement = "SELECT * FROM info_post WHERE ID=$id";
-	$results = mysqli_query($con, $sql_statement);
-	
-	return $results;
-}
-
-?>
-
-<?php  //Start the Session
-session_start();
-if(isset($_SESSION['Fingerprint']) && isset($_SESSION['Username'])){
-	$isFingerprintValid = false;
-	$con = connect_db();
-	$fingerprint = $_SESSION['Fingerprint'];
-	$username = $_SESSION['Username'];
-	$sql_statement = "SELECT * FROM user WHERE username='$username' and fingerprint='$fingerprint'";
-	$results = mysqli_query($con, $sql_statement);
-	while($result=mysqli_fetch_array($results)){
-		$isFingerprintValid = true;
-	}
-
-	if(!$isFingerprintValid){
-		$_SESSION['Status'] = "Invalid Login Credentials";
-		$url = "login.php";
-		
-		function redirect($url, $statusCode = 303)
-		{
-		   header('Location: ' . $url, true, $statusCode);
-		   die();
-		}
-		
-		redirect($url);
-	}
-
-	$length = 50;
-	$fingerprint = bin2hex(openssl_random_pseudo_bytes(16));
-	$username = $_SESSION['Username'];
-	$sql = "UPDATE user SET fingerprint='$fingerprint' WHERE username='$username'";
-	
-	if (!mysqli_query($con,$sql)) 
-	{
-		die('Error: ' . mysqli_error($con));
-	}
-
-	$_SESSION['Fingerprint'] = $fingerprint;
-
-	mysqli_close($con);
-}
-else if(isset($_COOKIE['simpleblog-token'])){
-	$isTokenValid = false;
-	$token = $_COOKIE['simpleblog-token'];
-	$con = connect_db();
-	$sql_statement = "SELECT * FROM user WHERE token='$token'";
-	$results = mysqli_query($con, $sql_statement);
-	while($result=mysqli_fetch_array($results)){
-		$isTokenValid = true;
-		$_SESSION['Fingerprint'] = $result['fingerprint'];
-		$_SESSION['Username'] = $result['username'];
-	}
-
-	$username = $_SESSION['Username'];
-
-	if($isTokenValid){
-		$length = 50;
-		$token = bin2hex(openssl_random_pseudo_bytes(16));
-
-		$sql = "UPDATE user SET token='$token' WHERE username='$username'";
-		
-		if (!mysqli_query($con,$sql)) 
-		{
-			die('Error: ' . mysqli_error($con));
-		}		
-		mysqli_close($con);
-		
-		$cookie_name="simpleblog-token";
-		$cookie_value=$token;
-		setcookie($cookie_name, $cookie_value, time() + (10 * 365 * 24 * 60 * 60)); //20 years;
-
-		$url = "index.php";
-		
-		function redirect($url, $statusCode = 303)
-		{
-		   header('Location: ' . $url, true, $statusCode);
-		   die();
-		}
-		
-		redirect($url);
-	}
-	else {
-		mysqli_close($con);
-		$_SESSION['Status'] = "Invalid Login Credentials";
-		$url = "login.php";
-		
-		function redirect($url, $statusCode = 303)
-		{
-		   header('Location: ' . $url, true, $statusCode);
-		   die();
-		}
-		
-		redirect($url);
-	}
-}
-else{
-	//3.2 When the user visits the page first time, simple login form will be displayed.
-	$url = "login.php";
-	
-	function redirect($url, $statusCode = 303)
-	{
-	   header('Location: ' . $url, true, $statusCode);
-	   die();
-	}
-	
-	redirect($url);
-}
+require_once('class/postManagement.php');
+include('auth.php');
+$_SESSION['token'] = $tokenHandler->regenerateToken(session_id(),"post");
+$postManagement = new postManagement();
+$result = $postManagement->getPostById($_GET['id']);
 ?>
 
 <!DOCTYPE html>
@@ -164,26 +38,22 @@ else{
 <![endif]-->
 
 <?php
-	$results = select_db();
-	while($result=mysqli_fetch_array($results))
-	{
-		echo "
-		<title>Simple Blog | ".htmlspecialchars($result['judul'])."</title>
-		";
-	}
+	echo "
+	<title>Simple Blog | ".htmlspecialchars($result['judul'])."</title>
+	";	
 ?>
 
 
 </head>
 
-<body class="default" onload="showComment(<?php echo $_POST['postIdPost'] ?>)">
+<body class="default" onload="showComment(<?php echo $_GET['id'] ?>)">
 <div class="wrapper">
 
 <nav class="nav">
     <a style="border:none;" id="logo" href="index.php"><h1>Simple<span>-</span>Blog</h1></a>
     <ul class="nav-primary">
         <li><a href="new_post.php">+ Tambah Post</a></li>
-        <li><?php echo $_SESSION['Username']; ?></a></li>
+        <li><?php echo $_SESSION['username']; ?></a></li>
         <li><a href="logout.php"> logout</a></li>
     </ul>
 </nav>
@@ -192,31 +62,31 @@ else{
     
     <header class="art-header">
 		<?php
-			$results = select_db();
-			while($result=mysqli_fetch_array($results))
-			{
-				echo"
-				<div class='art-header-inner' style='margin-top: 500px; opacity: 1;'>
-					<time class='art-time'>".htmlspecialchars($result['tanggal'])."</time>
-					<h2 class='art-title'>".htmlspecialchars($result['judul'])."</h2>
-					<p class='art-subtitle'></p>
-				</div>
-				";
-			}
+			echo"
+			<div class='art-header-inner' style='margin-top: 500px; opacity: 1;'>
+				<time class='art-time'>".htmlspecialchars($result['tanggal'])."</time>
+				<h2 class='art-title'>".htmlspecialchars($result['judul'])."</h2>
+				<p class='art-subtitle'></p>
+			</div>
+			";
 		?>
     </header>
 
     <div class="art-body">
         <div class="art-body-inner">
+            <p>
+              <?php 
+              if (isset($_SESSION['Status'])){
+                echo "<p>".$_SESSION['Status']."</p>";
+                unset($_SESSION['Status']);
+              }
+              ?>
+            </p>
             <hr class="featured-article" />
 			<?php
-				$results = select_db();
-				while($result=mysqli_fetch_array($results))
-				{
-					echo "
-					<p>".htmlspecialchars($result['konten'])."</p>
-					";
-				}
+				echo "
+				<p>".htmlspecialchars($result['konten'])."</p>
+				";
 			?>
             <hr />
             
@@ -224,16 +94,16 @@ else{
 
             <div id="contact-area">
                 <form method="post" id="comment_form" onsubmit="return false;">
-                    <label for="Nama">Nama:</label>
-                    <input type="text" name="Nama" id="Nama">
         
                     <label for="Email">Email:</label>
-                    <input type="text" name="Email" id="Email">
+                    <input type="text" name="Email" id="Email" value="<?php echo $_SESSION['username'] ?>" disabled>
                     
                     <label for="Komentar">Komentar:</label><br>
                     <textarea name="Komentar" rows="20" cols="20" id="Komentar"></textarea>
 
-                    <input type="submit" name="submit" value="Kirim" class="submit-button" onclick="Comment(<?php echo $_POST['postIdPost'] ?>)">
+                    <input type='hidden' name='token' id='token' value='<?php echo $_SESSION['token']; ?>'>
+
+                    <input type="submit" name="submit" value="Kirim" class="submit-button" onclick="Comment(<?php echo $_GET['id'] ?>)">
                 </form>
             </div>
 
@@ -259,7 +129,7 @@ else{
       z.parentNode.insertBefore(t,z)}(window,document,'script','ga'));
       ga('create',ga_ua);ga('send','pageview');
 </script>
-<script type="text/javascript" src="assets/js/ajax.js"></script>
+<script type="text/javascript" src="assets/js/function.js"></script>
 
 </body>
 </html>

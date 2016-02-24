@@ -1,61 +1,23 @@
-<?php
-function connect_db()
-{
-  // Create connection
-  $con=mysqli_connect("localhost","root","","simple_post");
-
-  // Check connection
-  if (mysqli_connect_errno()) {
-    echo "Failed to connect to MySQL: " . mysqli_connect_error();
-  }
-  
-  return $con;
-}
-?>
 <?php  //Start the Session
+require_once('class/cookieHandler.php');
+require_once('class/tokenHandler.php');
+require_once('class/db.php');
+require_once('class/utils.php');
 session_start();
-if(isset($_COOKIE['simpleblog-token'])){
-  $isTokenValid = false;
-  $token = $_COOKIE['simpleblog-token'];
-  $con = connect_db();
-  $sql_statement = "SELECT * FROM user WHERE token='$token'";
-  $results = mysqli_query($con, $sql_statement);
-  while($result=mysqli_fetch_array($results)){
-    $isTokenValid = true;
-    $_SESSION['Fingerprint'] = $result['fingerprint'];
-    $_SESSION['Username'] = $result['username'];
-  }
-
-  $username = $_SESSION['Username'];
-
-  if($isTokenValid){
-    $length = 50;
-    $token = bin2hex(openssl_random_pseudo_bytes(16));
-
-    $sql = "UPDATE user SET token='$token' WHERE username='$username'";
-    
-    if (!mysqli_query($con,$sql)) 
-    {
-      die('Error: ' . mysqli_error($con));
-    }   
-
-    $cookie_name="simpleblog-token";
-    $cookie_value=$token;
-    setcookie($cookie_name, $cookie_value, time() + (10 * 365 * 24 * 60 * 60)); //20 years;
-    mysqli_close($con);
-
-    $url = "index.php";
-    
-    function redirect($url, $statusCode = 303)
-    {
-       header('Location: ' . $url, true, $statusCode);
-       die();
-    }
-    
-    redirect($url);
-  }
+$cookieHandler = new cookieHandler();
+$tokenHandler = new tokenHandler();
+$utils = new utils();
+if($cookieHandler->checkCookie()){
+  $_SESSION['userId'] = $cookieHandler->getUserId();
+  $_SESSION['username'] = $cookieHandler->getUsername();
+  $string = "".session_id()."RememberMe"."KPI".time();
+  $token = $tokenHandler->generateTokenWithSpecificString($string);
+  $_SESSION['token'] = $token;
+  $cookieHandler->updateCookie($token);
+  $utils->redirect("index.php");
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -86,7 +48,7 @@ if(isset($_COOKIE['simpleblog-token'])){
           ?>
       </div>
       <div class="modal-body">
-          <form class="form col-md-12 center-block" method="post" action="index.php">
+          <form class="form col-md-12 center-block" method="post" action="index.php" onsubmit="secureForm()">
             <div class="form-group">
               <input type="text" class="form-control input-lg" placeholder="Email" id="Username" name="Username">
             </div>
@@ -109,6 +71,8 @@ if(isset($_COOKIE['simpleblog-token'])){
   </div>
 </div>
 	<!-- script references -->
+    <script type="text/javascript" src="assets/js/sha256.js"></script>
+    <script type="text/javascript" src="assets/js/function.js"></script>
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
 	</body>

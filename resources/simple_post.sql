@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 22 Feb 2016 pada 03.36
+-- Generation Time: 24 Feb 2016 pada 17.52
 -- Versi Server: 10.1.8-MariaDB
 -- PHP Version: 5.6.14
 
@@ -28,23 +28,24 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `info_komentar` (
   `ID` int(11) NOT NULL,
-  `nama` varchar(256) NOT NULL,
   `komentar` text NOT NULL,
-  `tanggal` date NOT NULL,
-  `waktu` time NOT NULL
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data untuk tabel `info_komentar`
 --
 
-INSERT INTO `info_komentar` (`ID`, `nama`, `komentar`, `tanggal`, `waktu`) VALUES
-(0, 'ichwan', 'iya nih kangen~', '2016-02-22', '02:24:16'),
-(1, 'ichwan', 'iya nih kangen~', '2016-02-22', '02:33:35'),
-(1, 'ichwan', 'halo!', '2016-02-22', '02:33:42'),
-(1, 'ichwan', 'imba lah make ajax! oTL', '2016-02-22', '02:34:03'),
-(5, 'ichwan', 'tes komentar!', '2016-02-22', '08:06:30'),
-(1, 'ichwan', 'implementasi fingerprint~', '2016-02-22', '08:40:09');
+INSERT INTO `info_komentar` (`ID`, `komentar`, `date`, `user_id`) VALUES
+(0, 'iya nih kangen~', '2016-02-23 19:45:07', 0),
+(1, 'iya nih kangen~', '2016-02-23 19:45:07', 0),
+(1, 'halo!', '2016-02-23 19:45:07', 0),
+(1, 'imba lah make ajax! oTL', '2016-02-23 19:45:07', 0),
+(5, 'tes komentar!', '2016-02-23 19:45:07', 0),
+(1, 'implementasi fingerprint~', '2016-02-23 19:45:07', 0),
+(7, 'tes komentar', '2016-02-24 16:38:31', 40),
+(7, 'tes', '2016-02-24 16:39:28', 40);
 
 -- --------------------------------------------------------
 
@@ -56,18 +57,18 @@ CREATE TABLE `info_post` (
   `ID` int(11) NOT NULL,
   `judul` varchar(256) NOT NULL,
   `konten` text NOT NULL,
-  `tanggal` date NOT NULL
+  `tanggal` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data untuk tabel `info_post`
 --
 
-INSERT INTO `info_post` (`ID`, `judul`, `konten`, `tanggal`) VALUES
-(1, 'halo!', 'Halo lama tidak berjumpa simpleblog ^_^', '2016-02-23'),
-(3, 'tes script', '<script>alert("woi")</script>', '2016-02-23'),
-(5, 'tes bikin post', 'halo guys!', '2016-02-23'),
-(6, 'tes bikin post 2', 'tes bikin post lagi gan!', '2016-02-23');
+INSERT INTO `info_post` (`ID`, `judul`, `konten`, `tanggal`, `user_id`) VALUES
+(1, 'halo!', 'Halo lama tidak berjumpa simpleblog ^_^', '2016-02-23 20:33:53', 39),
+(7, 'tes11', 'tes11', '2016-02-24 07:13:28', 40),
+(8, 'halo', 'halo halo halo', '2016-02-24 16:52:10', 40);
 
 -- --------------------------------------------------------
 
@@ -79,16 +80,16 @@ CREATE TABLE `user` (
   `ID` int(11) NOT NULL,
   `username` varchar(256) NOT NULL,
   `password` text NOT NULL,
-  `token` text,
-  `fingerprint` text
+  `token` text
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data untuk tabel `user`
 --
 
-INSERT INTO `user` (`ID`, `username`, `password`, `token`, `fingerprint`) VALUES
-(39, 'tes@tes.com', '$2y$11$FHBK.nnI/Y.n.Mf6rYvv5u94l7Ku.ONU9NSPScDSTNORPuB3263FK', 'c207f9dc5f5f23a76b774607b2199ced', '63ec9d93dc7b8602ecfd16072d576d4d');
+INSERT INTO `user` (`ID`, `username`, `password`, `token`) VALUES
+(39, 'tes@tes.com', '$2y$11$FHBK.nnI/Y.n.Mf6rYvv5u94l7Ku.ONU9NSPScDSTNORPuB3263FK', 'c207f9dc5f5f23a76b774607b2199ced'),
+(40, 'ichwan@gmail.com', '79d1dc29d89e51ccc7a00999f6740a0ef38c18b2c29fa74976a598408d451c42', NULL);
 
 --
 -- Indexes for dumped tables
@@ -114,7 +115,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `info_post`
 --
 ALTER TABLE `info_post`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 --
 -- AUTO_INCREMENT for table `user`
 --

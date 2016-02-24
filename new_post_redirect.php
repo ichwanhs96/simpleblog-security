@@ -1,101 +1,33 @@
 <?php
-function connect_db()
-{
-	// Create connection
-	$con=mysqli_connect("localhost","root","","simple_post");
+require_once('class/userManagement.php');
+include('auth.php');
+$db = new Db();
+$judul = $_POST['Judul'];
+$konten = $_POST['Konten'];
+$token = $_POST['token'];
+$judul = $db->quote($judul);
+$konten = $db->quote($konten);
 
-	// Check connection
-	if (mysqli_connect_errno()) {
-	echo "Failed to connect to MySQL: " . mysqli_connect_error();
-	}
-	
-	return $con;
-}
-?>
-<?php  //Start the Session
-session_start();
-if(isset($_SESSION['Fingerprint']) && isset($_SESSION['Username'])){
-	$isFingerprintValid = false;
-	$con = connect_db();
-	$fingerprint = $_SESSION['Fingerprint'];
-	$username = $_SESSION['Username'];
-	$sql_statement = "SELECT * FROM user WHERE username='$username' and fingerprint='$fingerprint'";
-	$results = mysqli_query($con, $sql_statement);
-	while($result=mysqli_fetch_array($results)){
-		$isFingerprintValid = true;
-	}
-
-	if(!$isFingerprintValid){
-		$_SESSION['Status'] = "Invalid Login Credentials";
-		$url = "login.php";
-		
-		function redirect($url, $statusCode = 303)
-		{
-		   header('Location: ' . $url, true, $statusCode);
-		   die();
+$userId = $_SESSION['userId'];
+$userManagement = new userManagement();
+if($token != $_SESSION['token']){
+	$_SESSION['Status'] = "Invalid Login Credentials";
+	$utils->redirect("login.php");
+} else {
+	if($userManagement->isUserExist($userId)){
+		//insert new data
+		$query = "INSERT INTO info_post (judul, konten, user_id) VALUES (".$judul.", ".$konten.", ".$userId.")";
+		$result = $db->query($query);
+		if($result){
+			$_SESSION['Status'] = "Post added!";
+			$utils->redirect("index.php");
+		} else {
+			$_SESSION['Status'] = "Error, cannot add post!";
+			$utils->redirect("new_post.php");
 		}
-		
-		redirect($url);
+	} else {
+		$_SESSION['Status'] = "Invalid Login Credentials";
+		$utils->redirect("login.php");
 	}
-
-	$length = 50;
-	$fingerprint = bin2hex(openssl_random_pseudo_bytes(16));
-	$username = $_SESSION['Username'];
-	$sql = "UPDATE user SET fingerprint='$fingerprint' WHERE username='$username'";
-	
-	if (!mysqli_query($con,$sql)) 
-	{
-		die('Error: ' . mysqli_error($con));
-	}
-
-	$_SESSION['Fingerprint'] = $fingerprint;
-
-	mysqli_close($con);
 }
-else{
-	//3.2 When the user visits the page first time, simple login form will be displayed.
-	$url = "login.php";
-	
-	function redirect($url, $statusCode = 303)
-	{
-	   header('Location: ' . $url, true, $statusCode);
-	   die();
-	}
-	
-	redirect($url);
-}
-?>
-<?php
-	// Create connection
-	$con=mysqli_connect("localhost","root","","simple_post");
-
-	// Check connection
-	if (mysqli_connect_errno()) {
-	echo "Failed to connect to MySQL: " . mysqli_connect_error();
-	}
-	
-	$judul = mysqli_real_escape_string($con, $_POST['Judul']);
-	$tanggal = mysqli_real_escape_string($con, $_POST['Tanggal']);
-	$konten = mysqli_real_escape_string($con, $_POST['Konten']);
-	
-	//insert new data
-	$sql = "INSERT INTO info_post (ID, judul, konten, tanggal)
-			VALUES ('','$judul', '$konten', '$tanggal')";
-	
-	if (!mysqli_query($con,$sql)) 
-	{
-		die('Error: ' . mysqli_error($con));
-	}
-	
-	mysqli_close($con);
-	
-	$url = "index.php";
-	
-	function redirect($url, $statusCode = 303)
-	{
-	   header('Location: ' . $url, true, $statusCode);
-	   die();
-	}
-	
-	redirect($url);
 ?>

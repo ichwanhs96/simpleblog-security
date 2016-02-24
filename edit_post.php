@@ -1,123 +1,22 @@
 <?php
-function connect_db()
-{
-	// Create connection
-	$con=mysqli_connect("localhost","root","","simple_post");
-
-	// Check connection
-	if (mysqli_connect_errno()) {
-	echo "Failed to connect to MySQL: " . mysqli_connect_error();
+include('auth.php');
+require_once('class/userManagement.php');
+require_once('class/utils.php');
+$_SESSION['token'] = $tokenHandler->regenerateToken(session_id(),"edit_post");
+$id = $_GET['id'];
+$userManagement = new userManagement();
+if($userManagement->isPostBelongsToUser($_SESSION['userId'], $id)){
+	$db = new Db();
+	$id = $db->quote($id);
+	$query = "SELECT * FROM info_post WHERE ID=".$id."";
+	$results = $db->select($query);
+	$result = null;
+	foreach ($results as $r) {
+		$result = $r;
 	}
-	
-	return $con;
-}
-
-?>
-<?php  //Start the Session
-session_start();
-if(isset($_SESSION['Fingerprint']) && isset($_SESSION['Username'])){
-	$isFingerprintValid = false;
-	$con = connect_db();
-	$fingerprint = $_SESSION['Fingerprint'];
-	$username = $_SESSION['Username'];
-	$sql_statement = "SELECT * FROM user WHERE username='$username' and fingerprint='$fingerprint'";
-	$results = mysqli_query($con, $sql_statement);
-	while($result=mysqli_fetch_array($results)){
-		$isFingerprintValid = true;
-	}
-
-	if(!$isFingerprintValid){
-		$_SESSION['Status'] = "Invalid Login Credentials";
-		$url = "login.php";
-		
-		function redirect($url, $statusCode = 303)
-		{
-		   header('Location: ' . $url, true, $statusCode);
-		   die();
-		}
-		
-		redirect($url);
-	}
-
-	$length = 50;
-	$fingerprint = bin2hex(openssl_random_pseudo_bytes(16));
-	$username = $_SESSION['Username'];
-	$sql = "UPDATE user SET fingerprint='$fingerprint' WHERE username='$username'";
-	
-	if (!mysqli_query($con,$sql)) 
-	{
-		die('Error: ' . mysqli_error($con));
-	}
-
-	$_SESSION['Fingerprint'] = $fingerprint;
-
-	mysqli_close($con);
-}
-else if(isset($_COOKIE['simpleblog-token'])){
-	$isTokenValid = false;
-	$token = $_COOKIE['simpleblog-token'];
-	$con = connect_db();
-	$sql_statement = "SELECT * FROM user WHERE token='$token'";
-	$results = mysqli_query($con, $sql_statement);
-	while($result=mysqli_fetch_array($results)){
-		$isTokenValid = true;
-		$_SESSION['Fingerprint'] = $result['fingerprint'];
-		$_SESSION['Username'] = $result['username'];
-	}
-
-	$username = $_SESSION['Username'];
-
-	if($isTokenValid){
-		$length = 50;
-		$token = bin2hex(openssl_random_pseudo_bytes(16));
-
-		$sql = "UPDATE user SET token='$token' WHERE username='$username'";
-		
-		if (!mysqli_query($con,$sql)) 
-		{
-			die('Error: ' . mysqli_error($con));
-		}		
-		mysqli_close($con);
-
-		$cookie_name="simpleblog-token";
-		$cookie_value=$token;
-		setcookie($cookie_name, $cookie_value, time() + (10 * 365 * 24 * 60 * 60)); //20 years;
-
-		$url = "index.php";
-		
-		function redirect($url, $statusCode = 303)
-		{
-		   header('Location: ' . $url, true, $statusCode);
-		   die();
-		}
-		
-		redirect($url);
-	}
-	else {
-		mysqli_close($con);
-		$_SESSION['Status'] = "Invalid Login Credentials";
-		$url = "login.php";
-		
-		function redirect($url, $statusCode = 303)
-		{
-		   header('Location: ' . $url, true, $statusCode);
-		   die();
-		}
-		
-		redirect($url);
-	}
-}
-else{
-	//3.2 When the user visits the page first time, simple login form will be displayed.
-	$url = "login.php";
-	
-	function redirect($url, $statusCode = 303)
-	{
-	   header('Location: ' . $url, true, $statusCode);
-	   die();
-	}
-	
-	redirect($url);
+} else {
+	$utils = new utils();
+	$utils->redirect("index.php");
 }
 ?>
 
@@ -164,7 +63,7 @@ else{
     <a style="border:none;" id="logo" href="index.php"><h1>Simple<span>-</span>Blog</h1></a>
 	<ul class="nav-primary">
         <li><a href="new_post.php">+ Tambah Post</a></li>
-        <li><?php echo $_SESSION['Username']; ?></a></li>
+        <li><?php echo $_SESSION['username']; ?></a></li>
         <li><a href="logout.php"> logout</a></li>
     </ul>
 </nav>
@@ -177,32 +76,32 @@ else{
     <div class="art-body">
         <div class="art-body-inner">
             <h2>Edit Post</h2>
+            <p>
+              <?php 
+              if (isset($_SESSION['Status'])){
+                echo "<p>".$_SESSION['Status']."</p>";
+                unset($_SESSION['Status']);
+              }
+              ?>
+            </p>
 			<?php
-				$id = $_POST['postIdEdit'];
-				$con = connect_db();
-				$sql_statement = "SELECT * FROM info_post WHERE ID=$id";
-				$results = mysqli_query($con, $sql_statement);
-				while($result=mysqli_fetch_array($results))
-				{
-					echo "
-					<div id='contact-area'>
-					<form method='post' id='form_post' name='form_post' action='edit_post_redirect.php' onsubmit='return postValidation();'>
-						<input type='hidden' name='ID' id='ID' value=".$id.">
-						<label for='Judul'>Judul:</label>
-						<input type='text' name='Judul' id='Judul' value=".$result['judul'].">
+				echo "
+				<div id='contact-area'>
+				<form method='post' id='form_post' name='form_post' action='edit_post_redirect.php' onsubmit='return postValidation();'>
+					<input type='hidden' name='ID' id='ID' value=".$id.">
+					<label for='Judul'>Judul:</label>
+					<input type='text' name='Judul' id='Judul' value=".$result['judul'].">
 
-						<label for='Tanggal'>Tanggal:</label>
-						<input type='text' name='Tanggal' id='Tanggal' placeholder='yyyy-mm-hh' value=".$result['tanggal'].">
-						
-						<label for='Konten'>Konten:</label><br>
-						<textarea name='Konten' rows='20' cols='20' id='Konten'>".$result['konten']."</textarea>
+					<input type='hidden' name='token' id='token' value=".$_SESSION['token'].">
+					
+					<label for='Konten'>Konten:</label><br>
+					<textarea name='Konten' rows='20' cols='20' id='Konten'>".$result['konten']."</textarea>
 
-						<input type='submit' name='submit' value='Simpan' class='submit-button'>
-					</form>
-					</div>
-					";
-				}
-				mysqli_close($con);
+					<input type='submit' name='submit' value='Simpan' class='submit-button'>
+				</form>
+				</div>
+				";
+			
 			?>
         </div>
     </div>
