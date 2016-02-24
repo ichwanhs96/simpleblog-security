@@ -78,6 +78,7 @@ include('auth.php');
 					<li class='art-list-item'>
 						<div class='art-list-item-title-and-time'>
 							<h2 class='art-list-title'><a href='post.php?id=".htmlspecialchars($result['ID'])."'>".htmlspecialchars($result['judul'])."</a></h2>
+              <div class='art-list-time'><img src=".htmlspecialchars("uploads/".$result['gambar'])." style='width:200px; height:200px'/></div>
 							<div class='art-list-time'>".htmlspecialchars($result['tanggal'])."</div>
 							<div class='art-list-time'><span style='color:#F40034;'>&#10029;</span> Featured</div>
 						</div>

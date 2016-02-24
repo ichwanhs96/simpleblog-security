@@ -17,7 +17,7 @@ if (isset($_POST['Username']) and isset($_POST['Password'])){
 	$db = new Db();
 	$username = $db->quote($username);
 
-	$query = "SELECT * FROM user WHERE username='".$username."'";
+	$query = "SELECT * FROM user WHERE username=".$username."";
 
 	$results = $db->select($query);
 	foreach ($results as $result) {
@@ -35,9 +35,9 @@ if (isset($_POST['Username']) and isset($_POST['Password'])){
 			//make a new cookie
 			$string = "".session_id()."RememberMe"."KPI".time();
 			$cookieHandler = new cookieHandler();
-			$cookieHandler.setUserId($_SESSION['userId']);
-			$cookieHandler.setUsername($_SESSION['username']);
-			$cookieHandler->generateNewCookie($string);
+			$cookieHandler->setUserId($_SESSION['userId']);
+			$cookieHandler->setUsername($_SESSION['username']);
+			$cookieHandler->generateNewCookie();
 		}
 		$string = "".session_id()."Login"."KPI".time();
 		$_SESSION['token'] = $tokenHandler->generateTokenWithSpecificString($string);

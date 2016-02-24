@@ -68,14 +68,15 @@ $_SESSION['token'] = $tokenHandler->regenerateToken(session_id(),"new_post");
               ?>
             </p>
             <div id="contact-area">
-                <form method="post" id="form_post" name="form_post" action="new_post_redirect.php" onsubmit="return postValidation();">
+                <form method="post" id="form_post" name="form_post" action="new_post_redirect.php" onsubmit="return postValidation();" enctype="multipart/form-data">
                     <label for="Judul">Judul:</label>
                     <input type="text" name="Judul" id="Judul">
+
+                    <label for="Konten">Gambar:</label><br>
+                    <input type="file" id="Gambar" name="Gambar" accept="image/*">
                     
                     <label for="Konten">Konten:</label><br>
                     <textarea name="Konten" rows="20" cols="20" id="Konten"></textarea>
-
-                    <!-- file input belum dibikin!!! -->
 
                     <input type='hidden' name='token' id='token' value='<?php echo $_SESSION['token']; ?>'>
 
@@ -84,7 +85,6 @@ $_SESSION['token'] = $tokenHandler->regenerateToken(session_id(),"new_post");
             </div>
         </div>
     </div>
-	<p id="debug"></p>
 
 </article>
 

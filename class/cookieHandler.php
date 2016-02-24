@@ -10,6 +10,7 @@ class cookieHandler{
 	public function checkCookie(){
 		if(isset($_COOKIE['simpleblog-token'])){
 			//get token
+			$isUserFound = false;
 			$token = $_COOKIE['simpleblog-token'];
   			$db = new Db();
   			$token = $db->quote($token);
@@ -18,14 +19,16 @@ class cookieHandler{
   			foreach ($results as $result) {
   				$userId = $result['ID'];
   				$username = $result['username'];
+  				$isUserFound = true;
   			}
-			return true;
+			return isUserFound ? true:false;
 		} else return false;
 	}
 
-	public function generateNewCookie($string){
-		if($userId == null) return false;
-		$token = new tokenHandler().generateTokenWithSpecificString($string);
+	public function generateNewCookie(){
+		if($this->userId == null) return false;
+		$token = new tokenHandler().generateRandomToken();
+		$token = $token."".time();
     	$cookie_name = "simpleblog-token";
 		$cookie_value = $token;
 		setcookie($cookie_name, $cookie_value, time() + (10 * 365 * 24 * 60 * 60)); //20 years;
