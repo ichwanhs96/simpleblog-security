@@ -15,6 +15,7 @@ if (isset($_POST['Username']) and isset($_POST['Password'])){
 	$password = $_POST['Password'];
 
 	$db = new Db();
+	$username = $db->quote($username);
 
 	$query = "SELECT * FROM user WHERE username='".$username."'";
 
