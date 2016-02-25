@@ -6,7 +6,7 @@ require_once('class/userManagement.php');
 class postManagement{
 	public function getPostById($postId){
 		$db = new Db();
-		$query = "SELECT * FROM info_post WHERE ID=".$postId."";
+		$query = "SELECT * FROM info_post WHERE ID=".$db->quote($postId)."";
 		$results = $db->select($query);
 		if($results != null){
 			foreach ($results as $result) {

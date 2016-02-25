@@ -2,6 +2,10 @@
 class Db {
     // The database connection
     protected static $connection;
+    protected static $username = 'root';
+    protected static $password = '';
+    protected static $db_name = 'simple_post';
+    protected static $db_url = 'locahost';
 
     /**
      * Connect to the database
@@ -11,7 +15,7 @@ class Db {
     public function connect() {    
         // Try and connect to the database
         if(!isset(self::$connection)) {
-            self::$connection = new mysqli('localhost',"root","","simple_post");
+            self::$connection = new mysqli(self::$db_url,self::$username,self::$password,self::$db_name);
         }
 
         // If connection was not successful, handle the error

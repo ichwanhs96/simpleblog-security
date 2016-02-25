@@ -1,0 +1,59 @@
+Auth.php:
+1. Itu ngecek cookie dulu baru ngecek session? berarti setiap kali di autentikasi selalu masuk bagian cookie dong
+2. itu pas ngecek sessionnya perlu ngecek ke database lagi?
+
+class/cookieHandler.php:
+1. Itu generate new cookie dan updateCookie punya logic yang mirip? reduksi?
+
+class/db.php:
+1. jangan lupa ganti user/pass dbnya
+
+class/postManagement.php:
+1. itu post id nya gak di quote? jaga sql inject
+
+class/tokenHandler.php:
+
+class/userManagement.php:
+
+class/utils.php
+
+comment.php:
+1. itu pakai GET? kalau POST?
+2. itu isUserExist mesti dipanggil?
+
+delete_post.php:
+
+edit_post.php:
+1. itu pas nampilin post ke html gak di htmlspecialchar?
+
+edit_post_redirect.php:
+1. gak ngudeng
+
+index.php:
+
+login.php:
+1. itu gak pakai auth.php?
+2. hmm , aneh, nanya lagi
+
+logout.php:
+
+new_post.php:
+
+new_post_redirect.php:
+1. gak ngudeng
+
+post.php:
+
+process_register.php:
+
+register.php:
+1. itu gak pakai auth.php
+
+show_comment.php:
+
+etc:
+1. itu generate cookie token dan ngeceknya  di jadiin satu kelas saja (token handler), biar logiknya gak pisah - pisah
+2. itu csrf tokennya kalau salah gak di generate ulang?
+
+
+  

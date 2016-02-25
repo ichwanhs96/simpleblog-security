@@ -90,7 +90,7 @@ if($userManagement->isPostBelongsToUser($_SESSION['userId'], $id)){
 				<form method='post' id='form_post' name='form_post' action='edit_post_redirect.php' onsubmit='return postValidation();' enctype='multipart/form-data'>
 					<input type='hidden' name='ID' id='ID' value=".$id.">
 					<label for='Judul'>Judul:</label>
-					<input type='text' name='Judul' id='Judul' value=".$result['judul'].">
+					<input type='text' name='Judul' id='Judul' value=".htmlspecialchars($result['judul']).">
 
 					<input type='hidden' name='token' id='token' value=".$_SESSION['token'].">
 
@@ -99,7 +99,7 @@ if($userManagement->isPostBelongsToUser($_SESSION['userId'], $id)){
                     <input type='file' id='Gambar' name='Gambar' accept='image/*'>
 					
 					<label for='Konten'>Konten:</label><br>
-					<textarea name='Konten' rows='20' cols='20' id='Konten'>".$result['konten']."</textarea>
+					<textarea name='Konten' rows='20' cols='20' id='Konten'>".htmlspecialchars($result['konten'])."</textarea>
 
 					<input type='submit' name='submit' value='Simpan' class='submit-button'>
 				</form>

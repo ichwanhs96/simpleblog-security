@@ -48,6 +48,16 @@ if (isset($_POST['Username']) and isset($_POST['Password'])){
 		$utils->redirect("login.php");
 	}
 }
+else if(isset($_SESSION['userId']) && isset($_SESSION['username']) && isset($_SESSION['token'])){
+	$userManagement = new userManagement();
+	if($userManagement->isUserExist($_SESSION['userId'])){
+
+	} else {
+		$utils = new utils();
+		$_SESSION['Status'] = "Invalid Login Credentials";
+		$utils->redirect("login.php");
+	}
+}
 else if($cookieHandler->checkCookie()){
   $_SESSION['userId'] = $cookieHandler->getUserId();
   $_SESSION['username'] = $cookieHandler->getUsername();
@@ -56,16 +66,6 @@ else if($cookieHandler->checkCookie()){
   $_SESSION['token'] = $token;
   $cookieHandler->updateCookie($token);
   $utils->redirect("index.php");
-}
-else if(isset($_SESSION['userId']) && isset($_SESSION['username']) && isset($_SESSION['token'])){
-	$userManagement = new userManagement();
-	if($userManagement->isUserExist($_SESSION['userId'])){
-		
-	} else {
-		$utils = new utils();
-		$_SESSION['Status'] = "Invalid Login Credentials";
-		$utils->redirect("login.php");
-	}
 }
 else{
 	$utils->redirect("login.php");
